@@ -119,6 +119,7 @@ let pressedPos = vec();
 let wasPressed = false;
 let isShowingGuide = false;
 let showingTripTicks = 0;
+let storageStageCount: number;
 
 (window as any).update = function () {
   if (!ticks) {
@@ -358,20 +359,21 @@ function setStage() {
 const stageCountKey = "hakosan_stage_count";
 
 function initStageCount() {
-  let storageStageCount = loadFromStorage();
+  storageStageCount = loadFromStorage();
   if (storageStageCount == null) {
     storageStageCount = 1;
   }
   const urlStageCount = loadFromUrl();
   stageCount = urlStageCount != null ? urlStageCount : storageStageCount;
   nextStageCount =
-    stageCount === storageStageCount
-      ? storageStageCount + 1
-      : storageStageCount;
+    stageCount <= storageStageCount ? stageCount + 1 : storageStageCount;
   saveAsUrl();
 }
 
 function saveToStorage() {
+  if (storageStageCount != null && storageStageCount > stageCount) {
+    return;
+  }
   try {
     localStorage.setItem(stageCountKey, String(stageCount));
   } catch (e) {
