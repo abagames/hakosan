@@ -70,9 +70,6 @@ function tryToCreateStage(stageCount): Stage {
       continue;
     }
     stepCount++;
-    //p.set([size.x - 2, 1, 1, 1][way], [1, size.y - 2, 1, 1][way]);
-    //pv.set([0, 1, 0, 1][way], [1, 0, 1, 0][way]);
-    //opv.set([-1, 0, 1, 0][way], [0, -1, 0, 1][way]);
     p.set(startPoss[way]);
     pv.set(nextOffsets[way]);
     opv.set(overEdgeOffsets[way]);
