@@ -2,8 +2,10 @@ import "./crisp-game-lib/bundle.js";
 import * as generator from "./generator";
 import { stableSort, wayVectors } from "./util";
 
+const viewSize = { x: 160, y: 160 };
+
 (window as any).options = {
-  viewSize: { x: 200, y: 200 },
+  viewSize,
   theme: "dark",
   isShowingScore: false,
   isPlayingBgm: true,
@@ -121,7 +123,7 @@ let showingTripTicks = 0;
 (window as any).update = function () {
   if (!ticks) {
     undoButton = getButton({
-      pos: vec(1, 192),
+      pos: vec(1, viewSize.y - 8),
       size: vec(25, 7),
       text: "UNDO",
       onClick: () => {
@@ -129,7 +131,7 @@ let showingTripTicks = 0;
       },
     });
     resetButton = getButton({
-      pos: vec(168, 192),
+      pos: vec(viewSize.x - 32, viewSize.y - 8),
       size: vec(31, 7),
       text: "RESET",
       onClick: () => {
@@ -288,19 +290,19 @@ function showingMessages() {
   if (showingTripTicks > 0) {
     showingTripTicks--;
     const m = `TRIP ${stageCount}`;
-    text(m, (200 - m.length * 6) / 2 + 3, offset.y - 9);
+    text(m, (viewSize.x - m.length * 6) / 2 + 3, offset.y - 9);
   }
   if (solvedTicks > 0) {
-    text("Arrived!", 80, offset.y + stage.size.y * 6 + 9);
+    text("Arrived!", 59, offset.y + stage.size.y * 6 + 9);
   }
   if (isShowingGuide) {
-    text("[Swipe]", 50, 150);
-    text("[     ] Move boxes", 50, 157);
-    text("[WASD ]", 50, 164);
-    text("[R]     Reset", 50, 173);
-    text("[U]     Undo", 50, 180);
+    text("[Swipe]", 40, 120);
+    text("[     ] Move boxes", 40, 127);
+    text("[WASD ]", 40, 134);
+    text("[R]     Reset", 40, 143);
+    text("[U]     Undo", 40, 150);
     times(4, (i) => {
-      char("n", 56 + i * 7, 158, { rotation: i });
+      char("n", 46 + i * 7, 128, { rotation: i });
     });
     if (input.isJustPressed || keyboard.isJustPressed) {
       isShowingGuide = false;
@@ -342,7 +344,10 @@ function setStage() {
   play("coin");
   stage = generator.createStage(stageCount);
   offset
-    .set((200 - stage.size.x * 6) / 2 + 3, (200 - stage.size.y * 6) / 2 + 3)
+    .set(
+      (viewSize.x - stage.size.x * 6) / 2 + 3,
+      (viewSize.y - stage.size.y * 6) / 2 + 3
+    )
     .floor();
   getCrates(stage.size, stage.grid);
   solvedTicks = 0;

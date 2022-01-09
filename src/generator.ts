@@ -31,7 +31,7 @@ function tryToCreateStage(stageCount): Stage {
   const gs = clamp(
     7 + random.getInt(ceil(sqrt(stageCount)), ceil(sqrt(stageCount) * 2)),
     7,
-    32
+    24
   );
   const size = vec(gs, random.getInt(ceil(gs * 0.5), gs + 1));
   if (random.get() < 0.5) {
