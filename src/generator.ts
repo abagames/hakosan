@@ -3,7 +3,7 @@ import { stableSort, wayVectors } from "./util";
 
 export type Stage = {
   size: Vector;
-  grid: ("empty" | "wall" | "wallOrEmpty" | "crate")[][];
+  grid: ("empty" | "wall" | "wallOrEmpty" | "box")[][];
   targetGrid: boolean[][];
   stepCount: number;
 };
@@ -37,13 +37,13 @@ function tryToCreateStage(stageCount): Stage {
   if (random.get() < 0.5) {
     size.swapXy();
   }
-  const grid: ("empty" | "wall" | "wallOrEmpty" | "crate")[][] = times(
+  const grid: ("empty" | "wall" | "wallOrEmpty" | "box")[][] = times(
     size.x,
     () => times(size.y, () => "wallOrEmpty")
   );
   const targetGrid = times(size.x, () => times(size.y, () => false));
   setAroundWalls(size, grid, targetGrid);
-  setCrates(size, 3, grid, targetGrid);
+  setBoxes(size, 3, grid, targetGrid);
   const startPoss = [
     vec(size.x - 2, 1),
     vec(1, size.y - 2),
@@ -60,8 +60,8 @@ function tryToCreateStage(stageCount): Stage {
   for (let i = 0; i < clamp(9 + sqrt(stageCount) * 3, 9, 49); i++) {
     way = random.getInt(0, 2) * 2 + (1 - (way % 2));
     let isAbleToSlip = true;
-    getCrates(size, grid).forEach((c) => {
-      if (!checkReverseSlipCrate(c, way, grid)) {
+    getBoxes(size, grid).forEach((c) => {
+      if (!checkReverseSlipBox(c, way, grid)) {
         isAbleToSlip = false;
       }
     });
@@ -74,8 +74,8 @@ function tryToCreateStage(stageCount): Stage {
     pv.set(nextOffsets[way]);
     opv.set(overEdgeOffsets[way]);
     for (;;) {
-      if (grid[p.x][p.y] === "crate") {
-        reverseSlipCrate(p, way, grid);
+      if (grid[p.x][p.y] === "box") {
+        reverseSlipBox(p, way, grid);
       }
       p.add(pv);
       if (p.x >= size.x - 1) {
@@ -112,60 +112,60 @@ function setAroundWalls(size: Vector, grid, targetGrid) {
   });
 }
 
-function setCrates(size: Vector, cc: number, grid, targetGrid) {
-  let cx = -1;
-  let cy = -1;
+function setBoxes(size: Vector, bc: number, grid, targetGrid) {
+  let bx = -1;
+  let by = -1;
   let c = 0;
-  times(cc, () => {
+  times(bc, () => {
     while (
-      cx <= 0 ||
-      cx >= size.x - 1 ||
-      cy <= 0 ||
-      cy >= size.y - 1 ||
+      bx <= 0 ||
+      bx >= size.x - 1 ||
+      by <= 0 ||
+      by >= size.y - 1 ||
       random.get() < 0.5 ||
-      targetGrid[cx][cy]
+      targetGrid[bx][by]
     ) {
-      cx = random.getInt(floor(size.x * 0.2), ceil(size.x * 0.8));
-      cy = random.getInt(floor(size.y * 0.2), ceil(size.y * 0.8));
+      bx = random.getInt(floor(size.x * 0.2), ceil(size.x * 0.8));
+      by = random.getInt(floor(size.y * 0.2), ceil(size.y * 0.8));
       c++;
       if (c > 999) {
         return;
       }
     }
-    grid[cx][cy] = "crate";
-    targetGrid[cx][cy] = true;
+    grid[bx][by] = "box";
+    targetGrid[bx][by] = true;
     const wv = random.select(wayVectors);
-    cx += wv.x;
-    cy += wv.y;
+    bx += wv.x;
+    by += wv.y;
   });
 }
 
-function checkReverseSlipCrate(ocp: Vector, way: number, grid) {
+function checkReverseSlipBox(ocp: Vector, way: number, grid) {
   const wv = wayVectors[way];
   return grid[ocp.x - wv.x][ocp.y - wv.y] !== "empty";
 }
 
-function reverseSlipCrate(ocp: Vector, way: number, grid) {
+function reverseSlipBox(obp: Vector, way: number, grid) {
   const wv = wayVectors[way];
-  let cp = vec(ocp);
+  let bp = vec(obp);
   let lc = 0;
   const lcs: number[] = [];
   for (;;) {
-    cp.add(wv);
-    const g = grid[cp.x][cp.y];
-    if (g === "wall" || g === "crate") {
+    bp.add(wv);
+    const g = grid[bp.x][bp.y];
+    if (g === "wall" || g === "box") {
       break;
     }
     lc++;
-    times(ceil((countAroundWalls(cp, grid) * 3) / lc), () => {
+    times(ceil((countAroundWalls(bp, grid) * 3) / lc), () => {
       lcs.push(lc);
     });
     if (lc > 3) {
       break;
     }
   }
-  if (grid[ocp.x - wv.x][ocp.y - wv.y] === "wallOrEmpty") {
-    grid[ocp.x - wv.x][ocp.y - wv.y] = "wall";
+  if (grid[obp.x - wv.x][obp.y - wv.y] === "wallOrEmpty") {
+    grid[obp.x - wv.x][obp.y - wv.y] = "wall";
   }
   if (lc === 0) {
     return;
@@ -175,12 +175,12 @@ function reverseSlipCrate(ocp: Vector, way: number, grid) {
   } else {
     lc = random.getInt(1, lc + 1);
   }
-  cp = vec(ocp);
+  bp = vec(obp);
   times(lc, () => {
-    grid[cp.x][cp.y] = "empty";
-    cp.add(wv);
+    grid[bp.x][bp.y] = "empty";
+    bp.add(wv);
   });
-  grid[cp.x][cp.y] = "crate";
+  grid[bp.x][bp.y] = "box";
 }
 
 function countAroundWalls(p: Vector, grid) {
@@ -237,7 +237,7 @@ function checkEmptyColumn(size: Vector, x: number, grid, targetGrid) {
   times(size.y, (y) => {
     const g = grid[x][y];
     const tg = targetGrid[x][y];
-    if (g === "empty" || g === "crate" || tg) {
+    if (g === "empty" || g === "box" || tg) {
       result = false;
       return false;
     }
@@ -250,7 +250,7 @@ function checkEmptyRow(size: Vector, y: number, grid, targetGrid) {
   times(size.x, (x) => {
     const g = grid[x][y];
     const tg = targetGrid[x][y];
-    if (g === "empty" || g === "crate" || tg) {
+    if (g === "empty" || g === "box" || tg) {
       result = false;
       return false;
     }
@@ -268,7 +268,7 @@ function addWall(size: Vector, grid) {
   let hasWall = false;
   wayVectors.forEach((wv) => {
     const g = grid[gx + wv.x][gy + wv.y];
-    if (g === "wall" || g === "crate") {
+    if (g === "wall" || g === "box") {
       hasWall = true;
     }
   });
@@ -279,19 +279,19 @@ function addWall(size: Vector, grid) {
 
 function checkIsValidStage(size, grid, targetGrid) {
   let isValid = false;
-  getCrates(size, grid).forEach((cp) => {
-    if (!targetGrid[cp.x][cp.y]) {
+  getBoxes(size, grid).forEach((bp) => {
+    if (!targetGrid[bp.x][bp.y]) {
       isValid = true;
     }
   });
   return isValid;
 }
 
-function getCrates(size, grid) {
+function getBoxes(size, grid) {
   const poss: Vector[] = [];
   times(size.x, (x) =>
     times(size.y, (y) => {
-      if (grid[x][y] === "crate") {
+      if (grid[x][y] === "box") {
         poss.push(vec(x, y));
       }
     })

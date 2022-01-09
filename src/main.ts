@@ -110,11 +110,11 @@ let stage: generator.Stage;
 let stageCount = 1;
 let nextStageCount = 2;
 const offset = vec();
-let crates: { pos: Vector; way: number }[];
+let boxes: { pos: Vector; way: number }[];
 let undoButton: Button;
 let resetButton: Button;
 let solvedTicks = 0;
-let cratesHistory: { pos: Vector; way: number }[][];
+let boxesHistory: { pos: Vector; way: number }[][];
 let pressedPos = vec();
 let wasPressed = false;
 let isShowingGuide = false;
@@ -168,16 +168,16 @@ let storageStageCount: number;
   color("black");
   let isSolved = true;
   const p = vec();
-  crates.forEach((c) => {
-    p.set(offset.x + c.pos.x * 6, offset.y + c.pos.y * 6);
+  boxes.forEach((b) => {
+    p.set(offset.x + b.pos.x * 6, offset.y + b.pos.y * 6);
     let ch;
     if (solvedTicks > 0) {
       ch = "m";
       p.y += sin(solvedTicks * 0.07) * 2;
       solvedTicks++;
     } else {
-      ch = addWithCharCode("e", c.way * 2 + (floor(ticks / 30) % 2));
-      if (!stage.targetGrid[c.pos.x][c.pos.y]) {
+      ch = addWithCharCode("e", b.way * 2 + (floor(ticks / 30) % 2));
+      if (!stage.targetGrid[b.pos.x][b.pos.y]) {
         isSolved = false;
       }
     }
@@ -207,7 +207,7 @@ function handleInput() {
     if (wasPressed && pressedPos.distanceTo(input.pos) > 9) {
       const a = pressedPos.angleTo(input.pos);
       const w = wrap(floor((a + PI / 4) / (PI / 2)), 0, 4);
-      slipCrate(w, stage.grid);
+      slipBox(w, stage.grid);
     }
     wasPressed = false;
   }
@@ -215,22 +215,22 @@ function handleInput() {
     keyboard.code.ArrowRight.isJustPressed ||
     keyboard.code.KeyD.isJustPressed
   ) {
-    slipCrate(0, stage.grid);
+    slipBox(0, stage.grid);
   }
   if (
     keyboard.code.ArrowDown.isJustPressed ||
     keyboard.code.KeyS.isJustPressed
   ) {
-    slipCrate(1, stage.grid);
+    slipBox(1, stage.grid);
   }
   if (
     keyboard.code.ArrowLeft.isJustPressed ||
     keyboard.code.KeyA.isJustPressed
   ) {
-    slipCrate(2, stage.grid);
+    slipBox(2, stage.grid);
   }
   if (keyboard.code.ArrowUp.isJustPressed || keyboard.code.KeyW.isJustPressed) {
-    slipCrate(3, stage.grid);
+    slipBox(3, stage.grid);
   }
   if (keyboard.code.KeyU.isJustPressed) {
     undo();
@@ -240,34 +240,34 @@ function handleInput() {
   }
 }
 
-function slipCrate(way, grid) {
+function slipBox(way, grid) {
   play("select");
-  cratesHistory.push(
-    crates.map((c) => {
+  boxesHistory.push(
+    boxes.map((c) => {
       return { pos: vec(c.pos), way: c.way };
     })
   );
   switch (way) {
     case 0:
-      crates = stableSort(crates, (c1, c2) => c2.pos.x - c1.pos.x);
+      boxes = stableSort(boxes, (c1, c2) => c2.pos.x - c1.pos.x);
       break;
     case 1:
-      crates = stableSort(crates, (c1, c2) => c2.pos.y - c1.pos.y);
+      boxes = stableSort(boxes, (c1, c2) => c2.pos.y - c1.pos.y);
       break;
     case 2:
-      crates = stableSort(crates, (c1, c2) => c1.pos.x - c2.pos.x);
+      boxes = stableSort(boxes, (c1, c2) => c1.pos.x - c2.pos.x);
       break;
     case 3:
-      crates = stableSort(crates, (c1, c2) => c1.pos.y - c2.pos.y);
+      boxes = stableSort(boxes, (c1, c2) => c1.pos.y - c2.pos.y);
       break;
   }
   const wv = wayVectors[way];
-  crates.forEach((c) => {
-    c.way = way;
+  boxes.forEach((b) => {
+    b.way = way;
     for (let i = 0; i < 99; i++) {
-      c.pos.add(wv);
-      if (grid[c.pos.x][c.pos.y] === "wall" || existsCrate(c)) {
-        c.pos.sub(wv);
+      b.pos.add(wv);
+      if (grid[b.pos.x][b.pos.y] === "wall" || existsBox(b)) {
+        b.pos.sub(wv);
         break;
       }
     }
@@ -275,14 +275,14 @@ function slipCrate(way, grid) {
 }
 
 function undo() {
-  if (cratesHistory.length === 0) {
+  if (boxesHistory.length === 0) {
     return;
   }
   play("hit");
-  const ch = cratesHistory.pop();
+  const ch = boxesHistory.pop();
   ch.forEach((c, i) => {
-    crates[i].pos.set(c.pos);
-    crates[i].way = c.way;
+    boxes[i].pos.set(c.pos);
+    boxes[i].way = c.way;
   });
 }
 
@@ -311,22 +311,22 @@ function showingMessages() {
   }
 }
 
-function getCrates(size, grid) {
-  crates = [];
+function getBoxes(size, grid) {
+  boxes = [];
   times(size.x, (x) =>
     times(size.y, (y) => {
-      if (grid[x][y] === "crate") {
-        crates.push({ pos: vec(x, y), way: 1 });
+      if (grid[x][y] === "box") {
+        boxes.push({ pos: vec(x, y), way: 1 });
         grid[x][y] = "empty";
       }
     })
   );
 }
 
-function existsCrate(c) {
+function existsBox(b) {
   let exists = false;
-  crates.forEach((ac) => {
-    if (c !== ac && c.pos.equals(ac.pos)) {
+  boxes.forEach((ab) => {
+    if (b !== ab && b.pos.equals(ab.pos)) {
       exists = true;
     }
   });
@@ -350,10 +350,10 @@ function setStage() {
       (viewSize.y - stage.size.y * 6) / 2 + 3
     )
     .floor();
-  getCrates(stage.size, stage.grid);
+  getBoxes(stage.size, stage.grid);
   solvedTicks = 0;
   showingTripTicks = 180;
-  cratesHistory = [];
+  boxesHistory = [];
 }
 
 const stageCountKey = "hakosan_stage_count";
