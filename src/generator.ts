@@ -1,7 +1,7 @@
 import { Random } from "./random";
 import { stableSort, wayVectors } from "./util";
 
-type Stage = {
+export type Stage = {
   size: Vector;
   grid: ("empty" | "wall" | "wallOrEmpty" | "crate")[][];
   targetGrid: boolean[][];

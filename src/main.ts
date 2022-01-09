@@ -104,8 +104,9 @@ llllll
 `,
 ];
 
-let stage;
+let stage: generator.Stage;
 let stageCount = 1;
+let nextStageCount = 2;
 const offset = vec();
 let crates: { pos: Vector; way: number }[];
 let undoButton: Button;
@@ -135,6 +136,7 @@ let showingTripTicks = 0;
         setStage();
       },
     });
+    initStageCount();
     setStage();
     isShowingGuide = true;
   }
@@ -186,8 +188,7 @@ let showingTripTicks = 0;
     (solvedTicks > 60 && (input.isJustPressed || keyboard.isJustPressed)) ||
     solvedTicks > 300
   ) {
-    stageCount++;
-    setStage();
+    goToNextStage();
   }
   showingMessages();
   updateButton(undoButton);
@@ -327,6 +328,14 @@ function existsCrate(c) {
   return exists;
 }
 
+function goToNextStage() {
+  stageCount = nextStageCount;
+  nextStageCount++;
+  saveToStorage();
+  saveAsUrl();
+  setStage();
+}
+
 function setStage() {
   play("coin");
   stage = generator.createStage(stageCount);
@@ -337,6 +346,76 @@ function setStage() {
   solvedTicks = 0;
   showingTripTicks = 180;
   cratesHistory = [];
+}
+
+const stageCountKey = "hakosan_stage_count";
+
+function initStageCount() {
+  let storageStageCount = loadFromStorage();
+  if (storageStageCount == null) {
+    storageStageCount = 1;
+  }
+  const urlStageCount = loadFromUrl();
+  stageCount = urlStageCount != null ? urlStageCount : storageStageCount;
+  nextStageCount =
+    stageCount === storageStageCount
+      ? storageStageCount + 1
+      : storageStageCount;
+  saveAsUrl();
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(stageCountKey, String(stageCount));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+function loadFromStorage() {
+  let stageCountStr;
+  try {
+    stageCountStr = localStorage.getItem(stageCountKey);
+  } catch (e) {
+    console.log(e);
+  }
+  if (stageCountStr == null) {
+    return undefined;
+  } else {
+    const st = Math.floor(Number(stageCountStr));
+    return st > 0 ? st : undefined;
+  }
+}
+
+function saveAsUrl() {
+  const baseUrl = window.location.href.split("?")[0];
+  let url = `${baseUrl}?s=${stageCount}`;
+  try {
+    window.history.replaceState({}, "", url);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+function loadFromUrl() {
+  const query = window.location.search.substring(1);
+  if (query == null) {
+    return undefined;
+  }
+  let params = query.split("&");
+  let stageCountStr: string;
+  for (let i = 0; i < params.length; i++) {
+    const param = params[i];
+    const pair = param.split("=");
+    if (pair[0] === "s") {
+      stageCountStr = pair[1];
+    }
+  }
+  if (stageCountStr == null) {
+    return undefined;
+  }
+  const st = Math.floor(Number(stageCountStr));
+  return st > 0 ? st : undefined;
 }
 
 declare const onLoad: any;
