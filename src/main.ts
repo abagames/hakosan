@@ -94,18 +94,28 @@ llll
 wllw
 llll
 `,
+  `
+  ll
+   ll
+llllll
+llllll
+   ll
+  ll
+`,
 ];
 
 let stage;
 let stageCount = 1;
 const offset = vec();
 let crates: { pos: Vector; way: number }[];
-let undoButton;
-let resetButton;
-let solvedTicks;
+let undoButton: Button;
+let resetButton: Button;
+let solvedTicks = 0;
 let cratesHistory: { pos: Vector; way: number }[][];
 let pressedPos = vec();
 let wasPressed = false;
+let isShowingGuide = false;
+let showingTripTicks = 0;
 
 (window as any).update = function () {
   if (!ticks) {
@@ -126,6 +136,7 @@ let wasPressed = false;
       },
     });
     setStage();
+    isShowingGuide = true;
   }
   times(stage.size.x, (x) =>
     times(stage.size.y, (y) => {
@@ -178,6 +189,7 @@ let wasPressed = false;
     stageCount++;
     setStage();
   }
+  showingMessages();
   updateButton(undoButton);
   updateButton(resetButton);
 };
@@ -270,6 +282,29 @@ function undo() {
   });
 }
 
+function showingMessages() {
+  color("black");
+  if (showingTripTicks > 0) {
+    showingTripTicks--;
+    const m = `TRIP ${stageCount}`;
+    text(m, (200 - m.length * 6) / 2 + 3, offset.y - 9);
+  }
+  if (solvedTicks > 0) {
+    text("Arrived!", 80, offset.y + stage.size.y * 6 + 9);
+  }
+  if (isShowingGuide) {
+    text("[Swipe]", 50, 150);
+    text("[     ] Move boxes", 50, 157);
+    text("[WASD ]", 50, 164);
+    times(4, (i) => {
+      char("n", 56 + i * 7, 158, { rotation: i });
+    });
+    if (input.isJustPressed || keyboard.isJustPressed) {
+      isShowingGuide = false;
+    }
+  }
+}
+
 function getCrates(size, grid) {
   crates = [];
   times(size.x, (x) =>
@@ -300,6 +335,7 @@ function setStage() {
     .floor();
   getCrates(stage.size, stage.grid);
   solvedTicks = 0;
+  showingTripTicks = 180;
   cratesHistory = [];
 }
 
