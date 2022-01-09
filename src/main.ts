@@ -287,16 +287,20 @@ function undo() {
 }
 
 function showingMessages() {
-  color("black");
   if (showingTripTicks > 0) {
     showingTripTicks--;
     const m = `TRIP ${stageCount}`;
+    color("black");
     text(m, (viewSize.x - m.length * 6) / 2 + 3, offset.y - 9);
   }
   if (solvedTicks > 0) {
+    color("black");
     text("Arrived!", 59, offset.y + stage.size.y * 6 + 9);
   }
   if (isShowingGuide) {
+    color("white");
+    rect(36, 116, 110, 38);
+    color("black");
     text("[Swipe]", 40, 120);
     text("[     ] Move boxes", 40, 127);
     text("[WASD ]", 40, 134);
