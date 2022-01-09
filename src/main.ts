@@ -297,6 +297,8 @@ function showingMessages() {
     text("[Swipe]", 50, 150);
     text("[     ] Move boxes", 50, 157);
     text("[WASD ]", 50, 164);
+    text("[R]     Reset", 50, 173);
+    text("[U]     Undo", 50, 180);
     times(4, (i) => {
       char("n", 56 + i * 7, 158, { rotation: i });
     });
