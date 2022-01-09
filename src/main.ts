@@ -104,6 +104,8 @@ let undoButton;
 let resetButton;
 let solvedTicks;
 let cratesHistory: { pos: Vector; way: number }[][];
+let pressedPos = vec();
+let wasPressed = false;
 
 (window as any).update = function () {
   if (!ticks) {
@@ -169,7 +171,10 @@ let cratesHistory: { pos: Vector; way: number }[][];
     play("powerUp");
     solvedTicks = 1;
   }
-  if ((solvedTicks > 60 && keyboard.isJustPressed) || solvedTicks > 300) {
+  if (
+    (solvedTicks > 60 && (input.isJustPressed || keyboard.isJustPressed)) ||
+    solvedTicks > 300
+  ) {
     stageCount++;
     setStage();
   }
@@ -178,6 +183,18 @@ let cratesHistory: { pos: Vector; way: number }[][];
 };
 
 function handleInput() {
+  if (input.isJustPressed) {
+    pressedPos.set(input.pos);
+    wasPressed = true;
+  }
+  if (input.isJustReleased) {
+    if (wasPressed && pressedPos.distanceTo(input.pos) > 9) {
+      const a = pressedPos.angleTo(input.pos);
+      const w = wrap(floor((a + PI / 4) / (PI / 2)), 0, 4);
+      slipCrate(w, stage.grid);
+    }
+    wasPressed = false;
+  }
   if (
     keyboard.code.ArrowRight.isJustPressed ||
     keyboard.code.KeyD.isJustPressed
