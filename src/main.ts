@@ -178,16 +178,25 @@ let cratesHistory: { pos: Vector; way: number }[][];
 };
 
 function handleInput() {
-  if (keyboard.code.ArrowRight.isJustPressed) {
+  if (
+    keyboard.code.ArrowRight.isJustPressed ||
+    keyboard.code.KeyD.isJustPressed
+  ) {
     slipCrate(0, stage.grid);
   }
-  if (keyboard.code.ArrowDown.isJustPressed) {
+  if (
+    keyboard.code.ArrowDown.isJustPressed ||
+    keyboard.code.KeyS.isJustPressed
+  ) {
     slipCrate(1, stage.grid);
   }
-  if (keyboard.code.ArrowLeft.isJustPressed) {
+  if (
+    keyboard.code.ArrowLeft.isJustPressed ||
+    keyboard.code.KeyA.isJustPressed
+  ) {
     slipCrate(2, stage.grid);
   }
-  if (keyboard.code.ArrowUp.isJustPressed) {
+  if (keyboard.code.ArrowUp.isJustPressed || keyboard.code.KeyW.isJustPressed) {
     slipCrate(3, stage.grid);
   }
   if (keyboard.code.KeyU.isJustPressed) {
