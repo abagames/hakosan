@@ -1836,7 +1836,7 @@ image-rendering: pixelated;
     isPressed = true;
   }
 
-  var keyboard = /*#__PURE__*/ Object.freeze({
+  var keyboard$1 = /*#__PURE__*/ Object.freeze({
     __proto__: null,
     get isPressed() {
       return isPressed;
@@ -2408,13 +2408,13 @@ image-rendering: pixelated;
   function update$6(button) {
     const o = vec(input.pos).sub(button.pos);
     button.isHovered = o.isInRect(0, 0, button.size.x, button.size.y);
-    if (input.isJustPressed && button.isHovered) {
+    if (input.isJustPressed && !keyboard.isJustPressed && button.isHovered) {
       button.isPressed = true;
     }
     if (button.isPressed && !button.isHovered) {
       button.isPressed = false;
     }
-    if (button.isPressed && input.isJustReleased) {
+    if (button.isPressed && input.isJustReleased && !keyboard.isJustReleased) {
       button.onClick();
       button.isPressed = false;
       if (button.isToggle) {
@@ -3464,7 +3464,7 @@ image-rendering: pixelated;
   exports.ht = ht;
   exports.input = input$1;
   exports.jm = jm;
-  exports.keyboard = keyboard;
+  exports.keyboard = keyboard$1;
   exports.lc = lc;
   exports.line = line;
   exports.ls = ls;
