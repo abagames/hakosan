@@ -4,8 +4,7 @@
   "description": "Lead the three boxes to their destination",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build"
   },
   "author": "abagames",
   "license": "MIT",
