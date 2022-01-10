@@ -110,7 +110,8 @@ let stage: generator.Stage;
 let stageCount = 1;
 let nextStageCount = 2;
 const offset = vec();
-let boxes: { pos: Vector; way: number }[];
+let boxes: { pos: Vector; way: number; slipFrom: Vector }[];
+let boxSlipTicks = 0;
 let undoButton: Button;
 let resetButton: Button;
 let solvedTicks = 0;
@@ -169,7 +170,16 @@ let storageStageCount: number;
   let isSolved = true;
   const p = vec();
   boxes.forEach((b) => {
-    p.set(offset.x + b.pos.x * 6, offset.y + b.pos.y * 6);
+    if (boxSlipTicks > 0) {
+      boxSlipTicks--;
+      const r = boxSlipTicks / 9;
+      p.set(
+        offset.x + (b.slipFrom.x * r + b.pos.x * (1 - r)) * 6,
+        offset.y + (b.slipFrom.y * r + b.pos.y * (1 - r)) * 6
+      );
+    } else {
+      p.set(offset.x + b.pos.x * 6, offset.y + b.pos.y * 6);
+    }
     let ch;
     if (solvedTicks > 0) {
       ch = "m";
@@ -263,6 +273,7 @@ function slipBox(way, grid) {
   }
   const wv = wayVectors[way];
   boxes.forEach((b) => {
+    b.slipFrom.set(b.pos);
     b.way = way;
     for (let i = 0; i < 99; i++) {
       b.pos.add(wv);
@@ -272,6 +283,7 @@ function slipBox(way, grid) {
       }
     }
   });
+  boxSlipTicks = 9;
 }
 
 function undo() {
@@ -320,7 +332,7 @@ function getBoxes(size, grid) {
   times(size.x, (x) =>
     times(size.y, (y) => {
       if (grid[x][y] === "box") {
-        boxes.push({ pos: vec(x, y), way: 1 });
+        boxes.push({ pos: vec(x, y), way: 1, slipFrom: vec() });
         grid[x][y] = "empty";
       }
     })
