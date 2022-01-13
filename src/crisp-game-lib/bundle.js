@@ -1807,7 +1807,14 @@ image-rendering: pixelated;
       if (options$1.onKeyDown != null) {
         options$1.onKeyDown();
       }
-      if (e.code === "AltLeft" || e.code === "AltRight") {
+      if (
+        e.code === "AltLeft" ||
+        e.code === "AltRight" ||
+        e.code === "ArrowRight" ||
+        e.code === "ArrowDown" ||
+        e.code === "ArrowLeft" ||
+        e.code === "ArrowUp"
+      ) {
         e.preventDefault();
       }
     });
