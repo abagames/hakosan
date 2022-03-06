@@ -1,10 +1,10 @@
-import "./crisp-game-lib/bundle.js";
+import "crisp-game-lib";
 import * as generator from "./generator";
 import { stableSort, wayVectors } from "./util";
 
 const viewSize = { x: 160, y: 160 };
 
-(window as any).options = {
+const options: Options = {
   viewSize,
   theme: "dark",
   isShowingScore: false,
@@ -12,7 +12,7 @@ const viewSize = { x: 160, y: 160 };
   seed: 10,
 };
 
-(window as any).characters = [
+const characters = [
   `
 ll llll
 
@@ -122,7 +122,7 @@ let isShowingGuide = false;
 let showingTripTicks = 0;
 let storageStageCount: number;
 
-(window as any).update = function () {
+function update() {
   if (!ticks) {
     undoButton = getButton({
       pos: vec(1, viewSize.y - 8),
@@ -206,7 +206,7 @@ let storageStageCount: number;
   showingMessages();
   updateButton(undoButton);
   updateButton(resetButton);
-};
+}
 
 function handleInput() {
   if (input.isJustPressed) {
@@ -443,5 +443,4 @@ function loadFromUrl() {
   return st > 0 ? st : undefined;
 }
 
-declare const onLoad: any;
-window.addEventListener("load", onLoad);
+init({ update, options, characters });

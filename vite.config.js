@@ -2,7 +2,7 @@
  * @type {import('vite').UserConfig}
  */
 const config = {
-  base: "https://abagames.github.io/hakosan/build/",
+  base: "./",
   build: { outDir: "docs/build/" },
 };
 

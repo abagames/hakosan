@@ -4,12 +4,16 @@
   "description": "Lead the three boxes to their destination",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "author": "abagames",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.4.4",
     "vite": "^2.7.2"
+  },
+  "dependencies": {
+    "crisp-game-lib": "^1.0.0"
   }
 }
