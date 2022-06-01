@@ -2,4 +2,4 @@
 
 Lead the three boxes to their destination!
 
-<img src="./docs/screenshot.gif" alt="screenshot" width="200%"/>
+<img src="./docs/screenshot.gif" alt="screenshot" />
